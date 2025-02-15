@@ -1,0 +1,8 @@
+/* Directivas de Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos personalizados */
+@import "./styles/global.css";
+@import "./styles/components.css";
