@@ -1,5 +1,7 @@
 // NewAmigurumiForm.jsx
 import { useState } from 'react';
+import SpinnerScreen from './SpinnerScreen';
+import Result from './Result';
 
 export default function NewAmigurumiForm() {
   const [formData, setFormData] = useState({
@@ -8,10 +10,8 @@ export default function NewAmigurumiForm() {
     tamaño: '',
     dificultad: '',
     descripcion: '',
-    imagenReferencia: null,
     colores: '',
     detalles: '',
-    expresion: '',
     hilo: '',
     grosorHilo: '',
     aguja: '',
@@ -22,26 +22,73 @@ export default function NewAmigurumiForm() {
     unionPiezas: '',
     detallesAdicionales: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [reply, setReply] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    setFormData({
-      ...formData,
-      [name]: files ? files[0] : value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí procesás el envío del formulario
-    console.log(formData);
+    
+    // Construir el prompt a partir de los datos
+    const prompt = `Crea una guía para un amigurumi con la siguiente información:
+- Nombre: ${formData.nombre}
+- Tipo: ${formData.tipo}
+- Tamaño: ${formData.tamaño}
+- Dificultad: ${formData.dificultad}
+- Descripción: ${formData.descripcion}
+- Colores: ${formData.colores}
+- Detalles específicos: ${formData.detalles}
+- Material: ${formData.hilo} (Grosor: ${formData.grosorHilo}, Aguja: ${formData.aguja})
+- Relleno: ${formData.relleno}
+- Técnicas de crochet: ${formData.tecnicaCrochet}
+- Número de piezas: ${formData.piezas}
+- Forma: ${formData.forma}
+- Unión y detalles adicionales: ${formData.unionPiezas} ${formData.detallesAdicionales}`;
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/ai/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setReply(result.reply);
+      } else {
+        console.error('Error en el envío del formulario');
+      }
+    } catch (error) {
+      console.error('Error al enviar la solicitud', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Mientras carga, mostramos el spinner en pantalla completa
+  if (loading) {
+    return <SpinnerScreen />;
+  }
+
+  // Si ya se obtuvo respuesta, se muestra el componente Result
+  if (reply) {
+    return <Result reply={reply} />;
+  }
+
+  // Si no hay carga ni respuesta, se muestra el formulario
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 bg-white shadow rounded space-y-6">
-      {/* Información básica */}
+      <h2 className="text-2xl font-semibold mb-4 text-center">Crear Nuevo Amigurumi</h2>
+      
+      {/* Aquí se muestran las secciones del formulario */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Información básica</h2>
+        <h3 className="text-xl font-semibold mb-4">Información básica</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Nombre del amigurumi</label>
@@ -74,12 +121,12 @@ export default function NewAmigurumiForm() {
               name="tamaño"
               value={formData.tamaño}
               onChange={handleChange}
-              placeholder='Ej: 15 cm de alto, 10 cm de ancho'
+              placeholder='Ej: "15 cm de alto, 10 cm de ancho"'
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nivel de dificultad deseado</label>
+            <label className="block text-sm font-medium text-gray-700">Nivel de dificultad</label>
             <select
               name="dificultad"
               value={formData.dificultad}
@@ -95,9 +142,8 @@ export default function NewAmigurumiForm() {
         </div>
       </section>
 
-      {/* Diseño y apariencia */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Diseño y apariencia</h2>
+        <h3 className="text-xl font-semibold mb-4">Diseño y apariencia</h3>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Descripción detallada</label>
@@ -105,7 +151,7 @@ export default function NewAmigurumiForm() {
               name="descripcion"
               value={formData.descripcion}
               onChange={handleChange}
-              placeholder='Ej: "Un oso de peluche marrón con un parche en el ojo y un sombrero de marinero"'
+              placeholder='Ej: "Un oso de peluche marrón..."'
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
               rows="3"
               required
@@ -123,22 +169,21 @@ export default function NewAmigurumiForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Detalles específicos y expresión deseada</label>
+            <label className="block text-sm font-medium text-gray-700">Detalles específicos</label>
             <input
               type="text"
               name="detalles"
               value={formData.detalles}
               onChange={handleChange}
-              placeholder='Ej: "Ojos bordados, expresión feliz"'
+              placeholder='Ej: "Ojos bordados, expresión alegre"'
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
             />
           </div>
         </div>
       </section>
 
-      {/* Técnicas y materiales */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Técnicas y materiales</h2>
+        <h3 className="text-xl font-semibold mb-4">Técnicas y materiales</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Tipo de hilo preferido</label>
@@ -198,9 +243,8 @@ export default function NewAmigurumiForm() {
         </div>
       </section>
 
-      {/* Patrones y estructura */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Patrones y estructura</h2>
+        <h3 className="text-xl font-semibold mb-4">Patrones y estructura</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Número de piezas</label>
