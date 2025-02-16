@@ -1,8 +1,10 @@
-/* Directivas de Tailwind */
+/* index.css */
+
+/* 1) Importa primero tus otros CSS */
+@import "./styles/global.css";
+@import "./styles/components.css";
+
+/* 2) Luego las directivas de Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Estilos personalizados */
-@import "./styles/global.css";
-@import "./styles/components.css";

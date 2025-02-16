@@ -1,21 +1,22 @@
-import { useState } from 'react'
+import { Routes, Route } from 'react-router-dom';
+import Home from './components/Home';
+import Dashboard from './components/Dashboard';
+import Layout from './layout/Layout';
+import NewAmigurumiForm from './components/NewAmigurumiForm';
+import AmigurumiConImagen from './components/AmigurumiConImagen';
 
-import './App.css'
 
 function App() {
-
   return (
-    <>
-      <div className="min-h-screen flex flex-col items-center justify-center bg-green-100">
-        <h1 className="text-4xl font-bold text-red-700 mb-4">
-          ¡Tailwind funciona!
-        </h1>
-        <button className="btn-custom mb-4">Botón</button>
-        <div className="spinner"></div>
-      </div>
-
-    </>
-  )
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/nuevo-amigurumi" element={<NewAmigurumiForm />} />
+        <Route path="/amigurumi-con-imagen" element={<AmigurumiConImagen />} />
+      </Routes>
+    </Layout>
+  );
 }
 
-export default App
+export default App;
